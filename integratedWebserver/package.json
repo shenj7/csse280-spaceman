@@ -1,0 +1,15 @@
+{
+  "name": "integratedwebserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "integratedWebserver.js",
+  "scripts": {
+    "start": "nodemon integratedWebserver.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jackson Shen",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
