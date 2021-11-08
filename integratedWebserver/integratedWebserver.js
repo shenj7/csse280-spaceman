@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
+const { response } = require("express");
+const { RSA_NO_PADDING } = require("constants");
 
 // Setup
 const app = express();
@@ -45,8 +47,13 @@ function saveToServer(data) {
  *   response:                  {"word": "...", "index": #}
  */
 
-// TODO: Add your code here.
 
+app.post("/api/admin/add", (req, res) => {
+    data.push(req.body.word);
+    saveToServer(data);
+    res.send(JSON.stringify({"word": req.body.word}))
+    res.end();
+});
 
 /**
  * Read all	- Get all words
@@ -57,7 +64,11 @@ function saveToServer(data) {
  *   response:                  {"words": ["...", "..."], "length": #}
  */
 
-// TODO: Add your code here.
+
+app.get("/api/admin/words", (req, res) => {
+    res.send(JSON.stringify({"words":data}));
+    res.end();
+});
 
 
 /**
@@ -69,8 +80,12 @@ function saveToServer(data) {
  *    response:                  {"word": "...", "index": #}
  */
 
-// TODO: Add your code here.
 
+app.get("/api/admin/word/:id", (req, res) => {
+    const word = parseInt(req.params.id);
+    res.send(JSON.stringify({"word":data[word]}));
+    res.end();
+});
 
 /**
  *  Update - Update a word at index
@@ -81,8 +96,14 @@ function saveToServer(data) {
  *    response:                  {"word": "...", "index": #}
  */
 
-// TODO: Add your code here.
 
+app.put("/api/admin/word/:id", (req, res) => {
+    let word = parseInt(req.params.id);
+    let newWord = req.body.word;
+    data[word] = newWord||"penis";
+    saveToServer(data);
+    res.end();
+});
 
 /**
  *  Delete
@@ -93,9 +114,15 @@ function saveToServer(data) {
  *    response:                  {"index": #}  (i.e. the index that got deleted)
  */
 
-// TODO: Add your code here.
 
-
+app.delete("/api/admin/word/:id", (req, res) => {
+    const word = parseInt(req.params.id);
+    // data.splice(word);
+    data[word] = null;
+    data.splice(word, 1);
+    saveToServer(data);
+    res.end();
+});
 
 
 // ------------------------------------------------------------------------
@@ -110,8 +137,10 @@ function saveToServer(data) {
  *    response:                  {"length": #}
  */
 
-// TODO: Add your code here.
 
+app.get("/api/player/numwords", (req, res) => {
+    res.send(JSON.stringify({"length": data.length}));
+});
 
 /**
  *  Word Length - Get the length of a single word at the given index.
@@ -122,8 +151,13 @@ function saveToServer(data) {
  *    response:                  {"length": #, "index": #}
  */
 
-// TODO: Add your code here.
 
+app.get("/api/player/wordlength/:id", (req, res) => {
+    res.send(JSON.stringify({
+        "length": data[req.params.id].length,
+        "index": req.params.id
+    }))
+});
 
 /**
  *  Guess - Allow the player to make a guess and return where that letter is found in the word.
@@ -137,9 +171,25 @@ function saveToServer(data) {
  *     the interesting field is locations which is always an array, but could be an empty array [].
  */
 
-// TODO: Add your code here.
 
+app.get("/api/player/guess/:id/:letter", (req, res) => {
+    const word = data[req.params.id];
+    const letter = req.params.letter;
+    
+    let locations = [];
+    for (let x = 0; x < word.length; x++) {
+        if (word.toUpperCase().charAt(x) == letter) {
+            locations.push(x);
+        }
+    }
 
+    res.send(JSON.stringify({
+        "letter": letter,
+        "length": word.length,
+        "index": req.params.id,
+        "locations": locations,
+    }))
+});
 
 
 app.listen(3000);
